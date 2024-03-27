@@ -25,6 +25,11 @@ def get_colors_for_classes(num_classes):
     get_colors_for_classes.colors = colors  # Save colors for future calls.
     return colors
 
+def textsize(text, font):
+    im = Image.new(mode="P", size=(0, 0))
+    draw = ImageDraw.Draw(im)
+    _, _, width, height = draw.textbbox((0, 0), text=text, font=font)
+    return width, height
 
 def draw_boxes(image, boxes, box_classes, class_names, scores=None):
     """Draw bounding boxes on image.
@@ -42,11 +47,10 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None):
     Returns:
         A copy of `image` modified with given bounding boxes.
     """
-    image = Image.fromarray(np.floor(image * 255 + 0.5).astype('uint8'))
 
-    font = ImageFont.truetype(
-        font='font/FiraMono-Medium.otf',
-        size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    image = Image.fromarray(image)
+    font = ImageFont.load_default()
+
     thickness = (image.size[0] + image.size[1]) // 300
 
     colors = get_colors_for_classes(len(class_names))
@@ -61,7 +65,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None):
             label = '{}'.format(box_class)
 
         draw = ImageDraw.Draw(image)
-        label_size = draw.textsize(label, font)
+        label_size = textsize(label, font)
 
         top, left, bottom, right = box
         top = max(0, np.floor(top + 0.5).astype('int32'))
@@ -85,4 +89,4 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None):
         draw.text(text_origin, label, fill=(0, 0, 0), font=font)
         del draw
 
-    return np.array(image)
+    return image
